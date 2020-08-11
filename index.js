@@ -20,7 +20,8 @@ const listenPort = process.env.PORT || "5000";
   });
 
   const app = express();
-  app.use(express.static("node_modules/chatapp/dist"));
+  //   app.use(express.static("node_modules/chatapp/dist"));
+  app.use(express.static("frontend/dist"));
   const http = require("http").createServer(app);
 
   const graphqlServer = new ApolloServer({
