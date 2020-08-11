@@ -1,0 +1,13 @@
+{
+  "name": "RethinkDB Chat App",
+  "description": "A chat app using Node.js, GraphQL and RethinkDB",
+  "repository": "https://github.com/mostlytyped/rethink-chat-graphql",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "keywords": ["node", "rethinkdb", "chat", "reactive"],
+  "addons": [
+    "rethinkdb",
+    {
+      "plan": "free"
+    }
+  ]
+}
