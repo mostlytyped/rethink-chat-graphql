@@ -1,3 +1,3 @@
-release: node migrate.js && cd frontend && npm run build
-web: node index.js
-lorem-bot: node lorem-bot.js
+release: node server/migrate.js
+web: node server/index.js
+lorem-bot: node server/lorem-bot.js
