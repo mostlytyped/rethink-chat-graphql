@@ -18,7 +18,7 @@ const httpLink = createHttpLink({
 
 // Create the subscription websocket link
 const wsLink = new WebSocketLink({
-  uri: `ws://${window.location.host}/graphql`,
+  uri: `wss://${window.location.host}/graphql`,
   options: {
     reconnect: true,
   },
@@ -56,7 +56,9 @@ const apolloProvider = new VueApollo({
 
 Vue.config.productionTip = false;
 
-window.username = Math.random().toString(36).substring(2, 8);
+window.username = Math.random()
+  .toString(36)
+  .substring(2, 8);
 
 /* eslint-disable no-new */
 new Vue({
