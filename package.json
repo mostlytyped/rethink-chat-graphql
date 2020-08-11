@@ -1,8 +1,9 @@
 {
-  "name": "socket-chat-example",
+  "name": "rethink-chat-graphql",
   "version": "0.0.1",
-  "description": "my first socket.io app",
+  "description": "Chat app with RethinkDB and GraphQL",
   "dependencies": {
+    "@vue/cli-service": "^4.5.2",
     "apollo-server-express": "^2.15.1",
     "chatapp": "file:frontend",
     "connect-history-api-fallback": "^1.6.0",
