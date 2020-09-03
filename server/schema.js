@@ -1,10 +1,7 @@
-const { PubSub, gql, withFilter } = require("apollo-server-express");
-const pubsub = new PubSub();
-const rethink = require("rethinkdb");
-const { $$asyncIterator } = require("iterall");
+// server/schema.js
 
-exports.pubsub = pubsub;
-
+// GraphQL type definitions
+const { gql } = require("apollo-server-express");
 exports.typeDefs = gql`
   type Chat {
     user: String
@@ -13,17 +10,12 @@ exports.typeDefs = gql`
     ts: Float
   }
 
-  type Room {
-    id: String
-  }
-
   type Subscription {
     chatAdded(room: String!): Chat
   }
 
   type Query {
     chats(room: String!): [Chat]
-    rooms: [Room]
   }
 
   type Mutation {
@@ -31,6 +23,48 @@ exports.typeDefs = gql`
   }
 `;
 
+// GraphQL resolvers
+const r = require("rethinkdb");
+exports.resolvers = {
+  Subscription: {
+    chatAdded: {
+      async subscribe(parent, args, context, info) {
+        return new RethinkIterator(
+          r.table("chats").filter({ roomId: args.room }),
+          context.conn
+        );
+      },
+    },
+  },
+  Mutation: {
+    async sendChat(root, args, context) {
+      const chatMsg = {
+        user: args.user,
+        roomId: args.room,
+        msg: args.message,
+        ts: Date.now(),
+      };
+      await r
+        .table("chats")
+        .insert(chatMsg)
+        .run(context.conn);
+      return chatMsg;
+    },
+  },
+  Query: {
+    async chats(parent, args, context, info) {
+      const cursor = await r
+        .table("chats")
+        .filter({ roomId: args.room })
+        .orderBy(r.desc("ts"))
+        .run(context.conn);
+      return await cursor.toArray();
+    },
+  },
+};
+
+// Async iterator to access the RethinkDB change feed
+const { $$asyncIterator } = require("iterall");
 class RethinkIterator {
   constructor(query, conn) {
     this.cursor = query.changes().run(conn);
@@ -54,46 +88,3 @@ class RethinkIterator {
     return this;
   }
 }
-
-exports.resolvers = {
-  Subscription: {
-    chatAdded: {
-      async subscribe(parent, args, context, info) {
-        return new RethinkIterator(
-          rethink.table("chats").filter({ roomId: args.room }),
-          context.conn
-        );
-      },
-    },
-  },
-  Mutation: {
-    async sendChat(root, args, context) {
-      const chatMsg = {
-        user: args.user,
-        roomId: args.room,
-        msg: args.message,
-        ts: Date.now(),
-      };
-      await rethink.table("chats").insert(chatMsg).run(context.conn);
-      return chatMsg;
-    },
-  },
-  Query: {
-    async chats(parent, args, context, info) {
-      const cursor = await rethink
-        .table("chats")
-        .filter({ roomId: args.room })
-        .orderBy(rethink.desc("ts"))
-        .run(context.conn);
-      return await cursor.toArray();
-    },
-
-    async rooms(parent, args, context, info) {
-      const cursor = await rethink
-        .table("chats")("roomId")
-        .distinct()
-        .run(context.conn);
-      return await cursor.toArray();
-    },
-  },
-};

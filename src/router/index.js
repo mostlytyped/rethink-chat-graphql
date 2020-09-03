@@ -1,17 +1,13 @@
 import Vue from "vue";
 import Router from "vue-router";
-import Main from "@/components/Main";
-import ChatRoom from "@/components/ChatRoom";
+import Home from "@/views/Home";
+import ChatRoom from "@/views/ChatRoom";
 
 Vue.use(Router);
 
 export default new Router({
   routes: [
-    {
-      path: "/",
-      name: "Main",
-      component: Main,
-    },
-    { path: "/:roomId", name: "room", component: ChatRoom },
+    { path: "/", name: "Home", component: Home },
+    { path: "/:roomId", name: "Room", component: ChatRoom },
   ],
 });

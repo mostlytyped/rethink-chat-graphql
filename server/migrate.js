@@ -1,30 +1,36 @@
-var rethink = require("rethinkdb");
+// server/migrate.js
 
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
-}
+var r = require("rethinkdb");
 
-const rdbHost = process.env.RETHINKDB_HOST;
-const rdbPort = process.env.RETHINKDB_PORT;
-const rdbName = process.env.RETHINKDB_NAME;
-const rdbUser = process.env.RETHINKDB_USERNAME;
-const rdbPass = process.env.RETHINKDB_PASSWORD;
-
-rethink.connect(
+r.connect(
   {
-    host: rdbHost,
-    port: rdbPort,
-    username: rdbUser,
-    password: rdbPass,
-    db: rdbName,
+    host: process.env.RETHINKDB_HOST || "localhost",
+    port: process.env.RETHINKDB_PORT || 28015,
+    username: process.env.RETHINKDB_USERNAME || "admin",
+    password: process.env.RETHINKDB_PASSWORD || "",
+    db: process.env.RETHINKDB_NAME || "test",
   },
-  function (err, conn) {
+  function(err, conn) {
     if (err) throw err;
 
-    rethink.tableDrop("chats").run(conn, () => {
-      rethink.tableCreate("chats").run(conn, (err, result) => {
-        console.log(err, result);
-        conn.close();
+    r.tableList().run(conn, (err, cursor) => {
+      if (err) throw err;
+      cursor.toArray((err, tables) => {
+        if (err) throw err;
+
+        // Check if table exists
+        if (!tables.includes("chats")) {
+          // Table missing --> create
+          console.log("Creating chats table");
+          r.tableCreate("chats").run(conn, (err, _) => {
+            if (err) throw err;
+            console.log("Creating chats table -- done");
+            conn.close();
+          });
+        } else {
+          // Table exists --> exit
+          conn.close();
+        }
       });
     });
   }

@@ -27,7 +27,7 @@ export default {
     gotoRoom() {
       window.username = this.user;
       this.$router.push({
-        name: "room",
+        name: "Room",
         params: { roomId: this.room },
       });
     },
