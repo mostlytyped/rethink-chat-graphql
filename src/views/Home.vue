@@ -16,7 +16,7 @@
 
 <script>
 export default {
-  name: "Main",
+  name: "Home",
   data() {
     return {
       user: window.username,
